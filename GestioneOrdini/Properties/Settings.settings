@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="GestioneOrdini.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="GestioneOrdini_TbServices_TbServices" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://localhost/mago4/TbServices/TbServices.asmx</Value>
+    </Setting>
+    <Setting Name="GestioneOrdini_LogicManager_MicroareaLoginManager" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://localhost/Mago4/LoginManager/LoginManager.asmx</Value>
+    </Setting>
+    <Setting Name="GestioneOrdini_LockManager_MicroareaLockManager" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://localhost/Mago4/lockmanager/LockManager.asmx</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
