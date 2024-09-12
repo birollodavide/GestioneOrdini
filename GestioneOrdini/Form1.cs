@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using System.Web.Services;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace GestioneOrdini
 {
@@ -14,8 +16,48 @@ namespace GestioneOrdini
         {
             InitializeComponent();
             lblRicerca.Visible = false;
+            lblSalvataggio.Visible = false;
         }
+        private async void txtNumOrdine_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                lblRicerca.Visible = true;
+                string numOrdine = txtNumOrdine.Text;
 
+                doc = await Task.Run(() => Metodo(numOrdine));
+
+                //se doc == null c'è stato un errore
+                if (doc.Righe != null)
+                {
+                    var source = new BindingSource();
+                    source.DataSource = doc.Righe;
+                    dgvTabella.DataSource = source;
+                }
+
+                dgvTabella.Columns[0].HeaderText = "Riga";
+                dgvTabella.Columns[0].ReadOnly = true;
+                dgvTabella.Columns[1].HeaderText = "Posizione";
+                dgvTabella.Columns[1].Visible = false;
+                dgvTabella.Columns[2].HeaderText = "Tipo Riga";
+                dgvTabella.Columns[3].HeaderText = "Descrizione";
+                dgvTabella.Columns[4].HeaderText = "Articolo";
+                dgvTabella.Columns[4].ReadOnly = true;
+                dgvTabella.Columns[5].HeaderText = "UM";
+                dgvTabella.Columns[5].ReadOnly = true;
+                dgvTabella.Columns[6].HeaderText = "Qtà";
+                dgvTabella.Columns[7].HeaderText = "Valore Unitario";
+                dgvTabella.Columns[7].ReadOnly = true;
+                dgvTabella.Columns[8].HeaderText = "Sconto";
+                dgvTabella.Columns[9].HeaderText = "Quantità scontata";
+                dgvTabella.Columns[9].ReadOnly = true;
+                dgvTabella.Columns[10].HeaderText = "ID";
+                dgvTabella.Columns[10].Visible = false;
+                dgvTabella.Columns[11].HeaderText = "Notes";
+
+                lblRicerca.Visible = false;
+            }
+        }
         private async void btnCerca_Click(object sender, EventArgs e)
         {
             lblRicerca.Visible = true;
@@ -76,8 +118,6 @@ namespace GestioneOrdini
 
                 string[] dataOut = myWebService.aTbService.GetData(myWebService.AuthenticationToken, sXMLDoc, DateTime.Now, 0, 0, 0, true);
 
-                //myWebService.aTbService.SetData(myWebService.AuthenticationToken, sXMLDoc, DateTime.Now, 0, true, out string sResult);
-
                 if (dataOut != null && dataOut.Length > 0)
                 {
                     XmlDocument xDoc = new XmlDocument
@@ -95,22 +135,38 @@ namespace GestioneOrdini
                         {
                             //XmlNodeList elProgressivoList = (XmlNodeList)itemNode.SelectNodes("//maxs:Progressivo", nsmSchema);
                             XmlNodeList elInternalOrdNo = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:InternalOrdNo", nsmSchema);
+                            XmlNodeList elExternalOrdNo = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ExternalordNo", nsmSchema);
                             XmlNodeList elOrderDate = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:OrderDate", nsmSchema);
                             XmlNodeList elExpectedDeliveryDate = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ExpectedDeliveryDate", nsmSchema);
                             XmlNodeList elConfirmedDeliveryDate = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ConfirmedDeliveryDate", nsmSchema);
                             XmlNodeList elCustomer = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:Customer", nsmSchema);
+                            XmlNodeList elOurReference = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:OurReference", nsmSchema);
+                            XmlNodeList elYourReference = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:YourReference", nsmSchema);
+                            XmlNodeList elPayment = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:Payment", nsmSchema);
+                            XmlNodeList elCurrency = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:Currency", nsmSchema);
                             XmlNodeList elSaleOrdId_1 = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:SaleOrdId", nsmSchema);
                             XmlNodeList elAreaManager = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:AreaManager", nsmSchema);
+                            XmlNodeList elCompulsoryDeliveryDate = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:CompulsoryDeliveryDate", nsmSchema);
+                            XmlNodeList elShipToAddress = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ShipToAddress", nsmSchema);
+                            XmlNodeList elTBGuid = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:TBGuid", nsmSchema);
 
                             docTesta = new GestioneOrdini.DocTesta
                             {
                                 DocNo = elInternalOrdNo[0].InnerText.ToUpper(),
+                                ExternalOrdNo = elInternalOrdNo[0].InnerText,
                                 DocumentDate = elOrderDate[0].InnerText,
                                 ExpectedDeliveryDate = elExpectedDeliveryDate[0].InnerText,
                                 ConfirmedDeliveryDate = elConfirmedDeliveryDate[0].InnerText,
                                 CustSupp = elCustomer[0].InnerText.ToUpper(),
+                                OurReference = elOurReference[0].InnerText,
+                                YourReference = elYourReference[0].InnerText,
+                                Payment = elPayment[0].InnerText,
+                                Currency = elCurrency[0].InnerText,
                                 DocId = Convert.ToInt32(elSaleOrdId_1[0].InnerText.ToUpper()),
                                 AreaManager = elAreaManager[0].InnerText,
+                                CompulsoryDeliveryDate = elCompulsoryDeliveryDate[0].InnerText,
+                                ShipToAddress = elShipToAddress[0].InnerText,
+                                TBGuid = elTBGuid[0].InnerText,
                             };
 
                             //importo le righe
@@ -134,7 +190,7 @@ namespace GestioneOrdini
                                 {
                                     RowLine = Int32.Parse(elLine[i].InnerText),
                                     RowPosition = Int32.Parse(elPosition[i].InnerText),
-                                    RowLineType = Int32.Parse(elLineType[i].InnerText),
+                                    RowLineType = ConvertToString(Int32.Parse(elLineType[i].InnerText)),
                                     RowDescription = elDescription[i].InnerText,
                                     RowItem = elItem[i].InnerText,
                                     RowUoM = elUoM[i].InnerText,
@@ -164,12 +220,103 @@ namespace GestioneOrdini
             else return null;
         }
 
-        private void btnSalva_Click(object sender, EventArgs e)
+        private async void btnSalva_Click(object sender, EventArgs e)
+        {
+            lblSalvataggio.Visible = true;
+            
+            //Creazione documento
+            await Task.Run(() => CreaDocumento());
+
+            lblSalvataggio.Visible = false;
+        }
+
+        private void CreaDocumento()
         {
             string xmlDoc = "";
+            ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
+            int tbPort = myWebService.LoginMago(5);
+            
+            if(tbPort >= 10000)
+            {
+                xmlDoc = "<?xml version='1.0'?>";
+                xmlDoc += "<maxs:SaleOrd tbNamespace=\"Document.ERP.SaleOrders.Documents.SaleOrd\" xTechProfile=\"DefaultLight\" xmlns:maxs=\"http://www.microarea.it/Schema/2004/Smart/ERP/SaleOrders/SaleOrd/Standard/DefaultLight.xsd\">";
+                xmlDoc += "<maxs:Data>";
+                xmlDoc += "<maxs:SaleOrder master=\"true\">";
+                xmlDoc += $"<maxs:InternalOrdNo>{doc.DocNo}</maxs:InternalOrdNo>";
+                xmlDoc += $"<maxs:ExternalOrdNo>{doc.ExternalOrdNo}</maxs:ExternalOrdNo>";
+                xmlDoc += $"<maxs:OrderDate>{doc.DocumentDate}</maxs:OrderDate>";
+                xmlDoc += $"<maxs:ExpectedDeliveryDate>{doc.ExpectedDeliveryDate}</maxs:ExpectedDeliveryDate>";
+                xmlDoc += $"<maxs:ConfirmedDeliveryDate>{doc.ConfirmedDeliveryDate}</maxs:ConfirmedDeliveryDate>";
+                xmlDoc += $"<maxs:Customer>{doc.CustSupp}</maxs:Customer>";
+                xmlDoc += $"<maxs:OurReference>{doc.OurReference}</maxs:OurReference>";
+                xmlDoc += $"<maxs:YourReference>{doc.YourReference}</maxs:YourReference>";
+                xmlDoc += $"<maxs:Payment>{doc.Payment}</maxs:Payment>";
+                xmlDoc += $"<maxs:Currency>{doc.Currency}</maxs:Currency>";
+                xmlDoc += $"<maxs:AreaManager>{doc.AreaManager}</maxs:AreaManager>";
+                xmlDoc += $"<maxs:SaleOrdId>{doc.DocId}</maxs:SaleOrdId>";
+                xmlDoc += $"<maxs:CompulsoryDeliveryDate>{doc.CompulsoryDeliveryDate}</maxs:CompulsoryDeliveryDate>";
+                xmlDoc += $"<maxs:ShipToAddress>{doc.ShipToAddress}</maxs:ShipToAddress>";
+                xmlDoc += $"<maxs:TBGuid>{doc.TBGuid}</maxs:TBGuid>";
+                xmlDoc += "</maxs:SaleOrder>";
+                xmlDoc += "<maxs:Detail>";
 
+                for (int rows = 0; rows < doc.Righe.Count; rows++)
+                {
+                    var a = doc.Righe[rows];
+                    xmlDoc += "<maxs:DetailRow>";
+                    xmlDoc += $"<maxs:Line>{a.RowLine}</maxs:Line>";
+                    xmlDoc += $"<maxs:Position>{a.RowPosition}</maxs:Position>";
+                    xmlDoc += $"<maxs:LineType>{a.RowLineType}</maxs:LineType>";
+                    xmlDoc += $"<maxs:Description>{a.RowDescription}</maxs:Description>";
+                    xmlDoc += $"<maxs:Item>{a.RowItem}</maxs:Item>";
+                    xmlDoc += $"<maxs:UoM>{a.RowUoM}</maxs:UoM>";
+                    xmlDoc += $"<maxs:Qty>{a.RowQty}</maxs:Qty>";
+                    xmlDoc += $"<maxs:UnitValue>{a.RowUnitValue}</maxs:UnitValue>";
+                    xmlDoc += $"<maxs:DiscountFormula>{a.RowDiscountFormula}</maxs:DiscountFormula>";
+                    xmlDoc += $"<maxs:DiscountAmount>{a.RowDiscountAmount}</maxs:DiscountAmount>";
+                    xmlDoc += $"<maxs:SaleOrdId>{a.RowSaleOrdId}</maxs:SaleOrdId>";
+                    xmlDoc += $"<maxs:Notes>{a.RowNotes}</maxs:Notes>";
+                    xmlDoc += "</maxs:DetailRow>";
+                }
 
+                xmlDoc += "</maxs:Detail>";
+                xmlDoc += "</maxs:Data>";
+                xmlDoc += "</maxs:SaleOrd>";
+            }
 
+            myWebService.aTbService.SetData(myWebService.AuthenticationToken, xmlDoc, DateTime.Now, 0, true, out string sResult);
+            myWebService.LogoutMago();
+        }
+
+        private static string ConvertToString(int n)
+        {
+            switch (n)
+            {
+                case 3538944:
+                    return "Nota";
+                    break;
+                case 3538945:
+                    return "Riferimento";
+                    break;
+                case 3538946:
+                    return "Servizio";
+                    break;
+                case 3538947:
+                    return "Merce";
+                    break;
+                case 3538948:
+                    return "Descrittiva";
+                    break;
+                default:
+                    return "error";
+                    break;
+            }
+        }
+
+        private void btnNewForm_Click(object sender, EventArgs e)
+        {
+            Form2 f = new Form2();
+            f.Show();
         }
     }
 }
