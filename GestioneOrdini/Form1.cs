@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -65,7 +59,7 @@ namespace GestioneOrdini
             ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
             int tbPort = myWebService.LoginMago(5);
             GestioneOrdini.DocTesta docTesta = new GestioneOrdini.DocTesta();
-            List <Object> listFinale = new List<Object>();
+            List<Object> listFinale = new List<Object>();
 
             if (tbPort >= 10000)
             {
