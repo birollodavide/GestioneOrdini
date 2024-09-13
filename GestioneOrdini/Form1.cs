@@ -11,7 +11,7 @@ namespace GestioneOrdini
 {
     public partial class Form1 : Form
     {
-        DocTesta doc = new DocTesta();
+        private DocTesta doc = new DocTesta();
         public Form1()
         {
             InitializeComponent();
@@ -25,7 +25,7 @@ namespace GestioneOrdini
                 lblRicerca.Visible = true;
                 string numOrdine = txtNumOrdine.Text;
 
-                doc = await Task.Run(() => Metodo(numOrdine));
+                doc = await Task.Run(() => LeggiDocumento(numOrdine));
 
                 //se doc == null c'è stato un errore
                 if (doc.Righe != null)
@@ -63,7 +63,7 @@ namespace GestioneOrdini
             lblRicerca.Visible = true;
             string numOrdine = txtNumOrdine.Text;
 
-            doc = await Task.Run(() => Metodo(numOrdine));
+            doc = await Task.Run(() => LeggiDocumento(numOrdine));
 
             //se doc == null c'è stato un errore
             if (doc.Righe != null)
@@ -96,7 +96,7 @@ namespace GestioneOrdini
             lblRicerca.Visible = false;
         }
 
-        private static DocTesta Metodo(string sValore)
+        private static DocTesta LeggiDocumento(string sValore)
         {
             ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
             int tbPort = myWebService.LoginMago(5);
@@ -133,9 +133,8 @@ namespace GestioneOrdini
                         XmlElement itemNode = (XmlElement)xDoc.DocumentElement;
                         if (itemNode != null)
                         {
-                            //XmlNodeList elProgressivoList = (XmlNodeList)itemNode.SelectNodes("//maxs:Progressivo", nsmSchema);
                             XmlNodeList elInternalOrdNo = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:InternalOrdNo", nsmSchema);
-                            XmlNodeList elExternalOrdNo = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ExternalordNo", nsmSchema);
+                            XmlNodeList elExternalOrdNo = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ExternalOrdNo", nsmSchema);
                             XmlNodeList elOrderDate = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:OrderDate", nsmSchema);
                             XmlNodeList elExpectedDeliveryDate = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ExpectedDeliveryDate", nsmSchema);
                             XmlNodeList elConfirmedDeliveryDate = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ConfirmedDeliveryDate", nsmSchema);
@@ -153,7 +152,7 @@ namespace GestioneOrdini
                             docTesta = new GestioneOrdini.DocTesta
                             {
                                 DocNo = elInternalOrdNo[0].InnerText.ToUpper(),
-                                ExternalOrdNo = elInternalOrdNo[0].InnerText,
+                                ExternalOrdNo = elExternalOrdNo[0].InnerText,
                                 DocumentDate = elOrderDate[0].InnerText,
                                 ExpectedDeliveryDate = elExpectedDeliveryDate[0].InnerText,
                                 ConfirmedDeliveryDate = elConfirmedDeliveryDate[0].InnerText,
@@ -225,12 +224,12 @@ namespace GestioneOrdini
             lblSalvataggio.Visible = true;
             
             //Creazione documento
-            await Task.Run(() => CreaDocumento());
+            await Task.Run(() => CreaDocumento_Ordini());
 
             lblSalvataggio.Visible = false;
         }
 
-        private void CreaDocumento()
+        private void CreaDocumento_Ordini()
         {
             string xmlDoc = "";
             ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
@@ -288,6 +287,62 @@ namespace GestioneOrdini
             myWebService.LogoutMago();
         }
 
+        private void CreaDocumento_PickingPage()
+        {
+            string xmlDoc = "";
+            ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
+            int tbPort = myWebService.LoginMago(5);
+
+            if (tbPort >= 10000)
+            {
+                xmlDoc = "<?xml version='1.0'?>";
+                xmlDoc += "<maxs:PickingList xmlns:maxs=\"http://www.microarea.it/Schema/2004/Smart/ERP/Sales/PickingList/Users/sa/GestioneOrdini.xsd\" tbNamespace=\"Document.ERP.Sales.Documents.PickingList\" xTechProfile=\"GestioneOrdini\">";
+                xmlDoc += "<maxs:Data>";
+                xmlDoc += "<maxs:SaleDocument master=\"true\">";
+                //xmlDoc += $"<maxs:ExternalOrdNo>{docTesta.ExternalOrdNo}</maxs:ExternalOrdNo>";
+                //xmlDoc += $"<maxs:OrderDate>{docTesta.DocumentDate}</maxs:OrderDate>";
+                //xmlDoc += $"<maxs:ExpectedDeliveryDate>{docTesta.ExpectedDeliveryDate}</maxs:ExpectedDeliveryDate>";
+                //xmlDoc += $"<maxs:ConfirmedDeliveryDate>{docTesta.ConfirmedDeliveryDate}</maxs:ConfirmedDeliveryDate>";
+                xmlDoc += $"<maxs:CustSupp>{doc.CustSupp}</maxs:CustSupp>";
+                xmlDoc += $"<maxs:OurReference>{doc.OurReference}</maxs:OurReference>";
+                xmlDoc += $"<maxs:YourReference>{doc.YourReference}</maxs:YourReference>";
+                xmlDoc += $"<maxs:Payment>{doc.Payment}</maxs:Payment>";
+                xmlDoc += $"<maxs:Currency>{doc.Currency}</maxs:Currency>";
+                xmlDoc += $"<maxs:AreaManager>{doc.AreaManager}</maxs:AreaManager>";
+                //xmlDoc += $"<maxs:SaleDocId>{doc.DocId}</maxs:SaleDocId>";
+                //xmlDoc += $"<maxs:CompulsoryDeliveryDate>{docTesta.CompulsoryDeliveryDate}</maxs:CompulsoryDeliveryDate>";
+                xmlDoc += $"<maxs:ShipToAddress>{doc.ShipToAddress}</maxs:ShipToAddress>";
+                xmlDoc += "</maxs:SaleDocument>";
+                xmlDoc += "<maxs:Detail>";
+
+                for (int rows = 0; rows < doc.Righe.Count; rows++)
+                {
+                    var a = doc.Righe[rows];
+                    xmlDoc += "<maxs:DetailRow>";
+                    xmlDoc += $"<maxs:SaleDocId>{a.RowSaleOrdId}</maxs:SaleDocId>";
+                    xmlDoc += $"<maxs:Line>{a.RowLine}</maxs:Line>";
+                    //xmlDoc += $"<maxs:Position>{a.RowPosition}</maxs:Position>";
+                    xmlDoc += $"<maxs:LineType>{a.RowLineType}</maxs:LineType>";
+                    xmlDoc += $"<maxs:Description>{a.RowDescription}</maxs:Description>";
+                    xmlDoc += $"<maxs:Item>{a.RowItem}</maxs:Item>";
+                    xmlDoc += $"<maxs:UoM>{a.RowUoM}</maxs:UoM>";
+                    xmlDoc += $"<maxs:Qty>{a.RowQty}</maxs:Qty>";
+                    xmlDoc += $"<maxs:UnitValue>{a.RowUnitValue}</maxs:UnitValue>";
+                    xmlDoc += $"<maxs:DiscountFormula>{a.RowDiscountFormula}</maxs:DiscountFormula>";
+                    xmlDoc += $"<maxs:DiscountAmount>{a.RowDiscountAmount}</maxs:DiscountAmount>";
+                    xmlDoc += $"<maxs:Notes>{a.RowNotes}</maxs:Notes>";
+                    xmlDoc += "</maxs:DetailRow>";
+                }
+
+                xmlDoc += "</maxs:Detail>";
+                xmlDoc += "</maxs:Data>";
+                xmlDoc += "</maxs:PickingList>";
+            }
+
+            myWebService.aTbService.SetData(myWebService.AuthenticationToken, xmlDoc, DateTime.Now, 0, true, out string sResult);
+            myWebService.LogoutMago();
+        }
+
         private static string ConvertToString(int n)
         {
             switch (n)
@@ -312,11 +367,54 @@ namespace GestioneOrdini
                     break;
             }
         }
-
-        private void btnNewForm_Click(object sender, EventArgs e)
+        private async void btnLoad_Click(object sender, EventArgs e)
         {
-            Form2 f = new Form2();
-            f.Show();
+            await Task.Run(() => CreaDocumento_PickingPage());
+
+            if (doc.Righe != null)
+            {
+                var source = new BindingSource();
+                source.DataSource = doc.Righe;
+                dgvPickingPage.DataSource = source;
+            }
+
+            dgvPickingPage.Columns[0].HeaderText = "Riga";
+            dgvPickingPage.Columns[0].ReadOnly = true;
+            dgvPickingPage.Columns[1].HeaderText = "Posizione";
+            dgvPickingPage.Columns[1].Visible = false;
+            dgvPickingPage.Columns[2].HeaderText = "Tipo Riga";
+            dgvPickingPage.Columns[3].HeaderText = "Descrizione";
+            dgvPickingPage.Columns[4].HeaderText = "Articolo";
+            dgvPickingPage.Columns[4].ReadOnly = true;
+            dgvPickingPage.Columns[5].HeaderText = "UM";
+            dgvPickingPage.Columns[5].ReadOnly = true;
+            dgvPickingPage.Columns[6].HeaderText = "Qtà";
+            dgvPickingPage.Columns[7].HeaderText = "Valore Unitario";
+            dgvPickingPage.Columns[7].Visible = false;
+            dgvPickingPage.Columns[8].HeaderText = "Sconto";
+            dgvPickingPage.Columns[8].Visible = false;
+            dgvPickingPage.Columns[9].HeaderText = "Quantità scontata";
+            dgvPickingPage.Columns[9].Visible = false;
+            dgvPickingPage.Columns[10].HeaderText = "ID";
+            dgvPickingPage.Columns[10].Visible = false;
+            dgvPickingPage.Columns[11].HeaderText = "Note";
+            dgvPickingPage.Columns.Add("Lotto", "Lotto");;
+
+            //Nascondo le righe descrittive
+            foreach (DocRighe dr in doc.Righe)
+            {
+                if (dr.RowLineType.Equals("Descrittiva"))
+                {
+                    dgvPickingPage.Rows[dr.RowLine - 1].Visible = false;
+                }
+            }
+            dgvPickingPage.Refresh();
+        }
+
+        private void btnAddLotto_Click(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            form2.Show();
         }
     }
 }
