@@ -11,61 +11,16 @@ namespace GestioneOrdini
 {
     public partial class Form1 : Form
     {
-        private DocTesta doc = new DocTesta();
+        public DocTesta doc = new DocTesta();
         public Form1()
         {
             InitializeComponent();
             lblRicerca.Visible = false;
             lblSalvataggio.Visible = false;
         }
-        private async void txtNumOrdine_KeyDown(object sender, KeyEventArgs e)
+
+        private void caricaTabellaOrdini()
         {
-            if (e.KeyCode == Keys.Enter)
-            {
-                lblRicerca.Visible = true;
-                string numOrdine = txtNumOrdine.Text;
-
-                doc = await Task.Run(() => LeggiDocumento(numOrdine));
-
-                //se doc == null c'è stato un errore
-                if (doc.Righe != null)
-                {
-                    var source = new BindingSource();
-                    source.DataSource = doc.Righe;
-                    dgvTabella.DataSource = source;
-                }
-
-                dgvTabella.Columns[0].HeaderText = "Riga";
-                dgvTabella.Columns[0].ReadOnly = true;
-                dgvTabella.Columns[1].HeaderText = "Posizione";
-                dgvTabella.Columns[1].Visible = false;
-                dgvTabella.Columns[2].HeaderText = "Tipo Riga";
-                dgvTabella.Columns[3].HeaderText = "Descrizione";
-                dgvTabella.Columns[4].HeaderText = "Articolo";
-                dgvTabella.Columns[4].ReadOnly = true;
-                dgvTabella.Columns[5].HeaderText = "UM";
-                dgvTabella.Columns[5].ReadOnly = true;
-                dgvTabella.Columns[6].HeaderText = "Qtà";
-                dgvTabella.Columns[7].HeaderText = "Valore Unitario";
-                dgvTabella.Columns[7].ReadOnly = true;
-                dgvTabella.Columns[8].HeaderText = "Sconto";
-                dgvTabella.Columns[9].HeaderText = "Quantità scontata";
-                dgvTabella.Columns[9].ReadOnly = true;
-                dgvTabella.Columns[10].HeaderText = "ID";
-                dgvTabella.Columns[10].Visible = false;
-                dgvTabella.Columns[11].HeaderText = "Notes";
-
-                lblRicerca.Visible = false;
-            }
-        }
-        private async void btnCerca_Click(object sender, EventArgs e)
-        {
-            lblRicerca.Visible = true;
-            string numOrdine = txtNumOrdine.Text;
-
-            doc = await Task.Run(() => LeggiDocumento(numOrdine));
-
-            //se doc == null c'è stato un errore
             if (doc.Righe != null)
             {
                 var source = new BindingSource();
@@ -92,7 +47,74 @@ namespace GestioneOrdini
             dgvTabella.Columns[10].HeaderText = "ID";
             dgvTabella.Columns[10].Visible = false;
             dgvTabella.Columns[11].HeaderText = "Notes";
+            dgvTabella.Columns[12].Visible = false;
+            dgvTabella.Columns[13].Visible = false;
+        }
+        private void caricaTabellaPickingPage()
+        {
+            if (doc.Righe != null)
+            {
+                var source = new BindingSource();
+                source.DataSource = doc.Righe;
+                dgvPickingPage.DataSource = source;
+            }
 
+            dgvPickingPage.Columns[0].HeaderText = "Riga";
+            dgvPickingPage.Columns[0].ReadOnly = true;
+            dgvPickingPage.Columns[1].HeaderText = "Posizione";
+            dgvPickingPage.Columns[1].Visible = false;
+            dgvPickingPage.Columns[2].HeaderText = "Tipo Riga";
+            dgvPickingPage.Columns[3].HeaderText = "Descrizione";
+            dgvPickingPage.Columns[4].HeaderText = "Articolo";
+            dgvPickingPage.Columns[4].ReadOnly = true;
+            dgvPickingPage.Columns[5].HeaderText = "UM";
+            dgvPickingPage.Columns[5].ReadOnly = true;
+            dgvPickingPage.Columns[6].HeaderText = "Qtà";
+            dgvPickingPage.Columns[7].HeaderText = "Valore Unitario";
+            dgvPickingPage.Columns[7].Visible = false;
+            dgvPickingPage.Columns[8].HeaderText = "Sconto";
+            dgvPickingPage.Columns[8].Visible = false;
+            dgvPickingPage.Columns[9].HeaderText = "Quantità scontata";
+            dgvPickingPage.Columns[9].Visible = false;
+            dgvPickingPage.Columns[10].HeaderText = "ID";
+            dgvPickingPage.Columns[10].Visible = false;
+            dgvPickingPage.Columns[11].HeaderText = "Note";
+            dgvPickingPage.Columns[12].HeaderText = "Lotto";
+            dgvPickingPage.Columns[13].HeaderText = "Elementi Lotto";
+
+            //Nascondo le righe descrittive
+            foreach (DocRighe dr in doc.Righe)
+            {
+                if (dr.RowLineType.Equals("Descrittiva"))
+                {
+                    dgvPickingPage.Rows[dr.RowLine - 1].Visible = false;
+                }
+            }
+            dgvPickingPage.Refresh();
+        }
+        
+
+        private async void txtNumOrdine_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                lblRicerca.Visible = true;
+                string numOrdine = txtNumOrdine.Text;
+
+                doc = await Task.Run(() => LeggiDocumento(numOrdine));
+
+                caricaTabellaOrdini();
+                lblRicerca.Visible = false;
+            }
+        }
+        private async void btnCerca_Click(object sender, EventArgs e)
+        {
+            lblRicerca.Visible = true;
+            string numOrdine = txtNumOrdine.Text;
+
+            doc = await Task.Run(() => LeggiDocumento(numOrdine));
+
+            caricaTabellaOrdini();
             lblRicerca.Visible = false;
         }
 
@@ -225,6 +247,7 @@ namespace GestioneOrdini
             
             //Creazione documento
             await Task.Run(() => CreaDocumento_Ordini());
+            dgvPickingPage.Refresh(); 
 
             lblSalvataggio.Visible = false;
         }
@@ -299,18 +322,12 @@ namespace GestioneOrdini
                 xmlDoc += "<maxs:PickingList xmlns:maxs=\"http://www.microarea.it/Schema/2004/Smart/ERP/Sales/PickingList/Users/sa/GestioneOrdini.xsd\" tbNamespace=\"Document.ERP.Sales.Documents.PickingList\" xTechProfile=\"GestioneOrdini\">";
                 xmlDoc += "<maxs:Data>";
                 xmlDoc += "<maxs:SaleDocument master=\"true\">";
-                //xmlDoc += $"<maxs:ExternalOrdNo>{docTesta.ExternalOrdNo}</maxs:ExternalOrdNo>";
-                //xmlDoc += $"<maxs:OrderDate>{docTesta.DocumentDate}</maxs:OrderDate>";
-                //xmlDoc += $"<maxs:ExpectedDeliveryDate>{docTesta.ExpectedDeliveryDate}</maxs:ExpectedDeliveryDate>";
-                //xmlDoc += $"<maxs:ConfirmedDeliveryDate>{docTesta.ConfirmedDeliveryDate}</maxs:ConfirmedDeliveryDate>";
                 xmlDoc += $"<maxs:CustSupp>{doc.CustSupp}</maxs:CustSupp>";
                 xmlDoc += $"<maxs:OurReference>{doc.OurReference}</maxs:OurReference>";
                 xmlDoc += $"<maxs:YourReference>{doc.YourReference}</maxs:YourReference>";
                 xmlDoc += $"<maxs:Payment>{doc.Payment}</maxs:Payment>";
                 xmlDoc += $"<maxs:Currency>{doc.Currency}</maxs:Currency>";
                 xmlDoc += $"<maxs:AreaManager>{doc.AreaManager}</maxs:AreaManager>";
-                //xmlDoc += $"<maxs:SaleDocId>{doc.DocId}</maxs:SaleDocId>";
-                //xmlDoc += $"<maxs:CompulsoryDeliveryDate>{docTesta.CompulsoryDeliveryDate}</maxs:CompulsoryDeliveryDate>";
                 xmlDoc += $"<maxs:ShipToAddress>{doc.ShipToAddress}</maxs:ShipToAddress>";
                 xmlDoc += "</maxs:SaleDocument>";
                 xmlDoc += "<maxs:Detail>";
@@ -321,7 +338,6 @@ namespace GestioneOrdini
                     xmlDoc += "<maxs:DetailRow>";
                     xmlDoc += $"<maxs:SaleDocId>{a.RowSaleOrdId}</maxs:SaleDocId>";
                     xmlDoc += $"<maxs:Line>{a.RowLine}</maxs:Line>";
-                    //xmlDoc += $"<maxs:Position>{a.RowPosition}</maxs:Position>";
                     xmlDoc += $"<maxs:LineType>{a.RowLineType}</maxs:LineType>";
                     xmlDoc += $"<maxs:Description>{a.RowDescription}</maxs:Description>";
                     xmlDoc += $"<maxs:Item>{a.RowItem}</maxs:Item>";
@@ -330,6 +346,7 @@ namespace GestioneOrdini
                     xmlDoc += $"<maxs:UnitValue>{a.RowUnitValue}</maxs:UnitValue>";
                     xmlDoc += $"<maxs:DiscountFormula>{a.RowDiscountFormula}</maxs:DiscountFormula>";
                     xmlDoc += $"<maxs:DiscountAmount>{a.RowDiscountAmount}</maxs:DiscountAmount>";
+                    xmlDoc += $"<maxs:Lot>{a.RowLotto}</maxs:Lot>";
                     xmlDoc += $"<maxs:Notes>{a.RowNotes}</maxs:Notes>";
                     xmlDoc += "</maxs:DetailRow>";
                 }
@@ -371,50 +388,21 @@ namespace GestioneOrdini
         {
             await Task.Run(() => CreaDocumento_PickingPage());
 
-            if (doc.Righe != null)
-            {
-                var source = new BindingSource();
-                source.DataSource = doc.Righe;
-                dgvPickingPage.DataSource = source;
-            }
-
-            dgvPickingPage.Columns[0].HeaderText = "Riga";
-            dgvPickingPage.Columns[0].ReadOnly = true;
-            dgvPickingPage.Columns[1].HeaderText = "Posizione";
-            dgvPickingPage.Columns[1].Visible = false;
-            dgvPickingPage.Columns[2].HeaderText = "Tipo Riga";
-            dgvPickingPage.Columns[3].HeaderText = "Descrizione";
-            dgvPickingPage.Columns[4].HeaderText = "Articolo";
-            dgvPickingPage.Columns[4].ReadOnly = true;
-            dgvPickingPage.Columns[5].HeaderText = "UM";
-            dgvPickingPage.Columns[5].ReadOnly = true;
-            dgvPickingPage.Columns[6].HeaderText = "Qtà";
-            dgvPickingPage.Columns[7].HeaderText = "Valore Unitario";
-            dgvPickingPage.Columns[7].Visible = false;
-            dgvPickingPage.Columns[8].HeaderText = "Sconto";
-            dgvPickingPage.Columns[8].Visible = false;
-            dgvPickingPage.Columns[9].HeaderText = "Quantità scontata";
-            dgvPickingPage.Columns[9].Visible = false;
-            dgvPickingPage.Columns[10].HeaderText = "ID";
-            dgvPickingPage.Columns[10].Visible = false;
-            dgvPickingPage.Columns[11].HeaderText = "Note";
-            dgvPickingPage.Columns.Add("Lotto", "Lotto");;
-
-            //Nascondo le righe descrittive
-            foreach (DocRighe dr in doc.Righe)
-            {
-                if (dr.RowLineType.Equals("Descrittiva"))
-                {
-                    dgvPickingPage.Rows[dr.RowLine - 1].Visible = false;
-                }
-            }
-            dgvPickingPage.Refresh();
+            caricaTabellaPickingPage();
         }
 
         private void btnAddLotto_Click(object sender, EventArgs e)
         {
-            Form2 form2 = new Form2();
+            Form2 form2 = new Form2(this);
             form2.Show();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            int i = dgvPickingPage.SelectedRows[0].Index;
+            doc.Righe.RemoveAt(i);
+
+            caricaTabellaPickingPage();
         }
     }
 }

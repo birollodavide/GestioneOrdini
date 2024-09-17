@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace GestioneOrdini
 {
-    public class DocRighe
+    public class DocRighe : IComparable<DocRighe>
     {
         private int rowLine;
         private int rowPosition;
-        private int rowLineType;
+        private string rowLineType;
         private string rowDescription;
         private string rowItem;
         private string rowUoM;
@@ -20,6 +20,8 @@ namespace GestioneOrdini
         private double rowDiscountAmount;
         private int rowSaleOrdId;
         private string rowNotes;
+        private string rowLotto;
+        private int rowElementiLotto;
 
         public int RowLine
         {
@@ -43,7 +45,7 @@ namespace GestioneOrdini
                 rowPosition = value;
             }
         }
-        public int RowLineType
+        public string RowLineType
         {
             get
             {
@@ -153,9 +155,44 @@ namespace GestioneOrdini
                 rowNotes = value;
             }
         }
-
+        public string RowLotto
+        {
+            get
+            {
+                return rowLotto;
+            }
+            set
+            {
+                rowLotto = value;
+            }
+        }
+        public int RowElementiLotto
+        {
+            get
+            {
+                return rowElementiLotto;
+            }
+            set
+            {
+                rowElementiLotto = value;
+            }
+        }
+        
         public DocRighe()
         {
+        }
+
+        public DocRighe ShallowCopy()
+        {
+            return (DocRighe)this.MemberwiseClone();
+        }
+
+        public int CompareTo(DocRighe altraRiga)
+        {
+            if (altraRiga == null) return 1;
+
+            // Confronta per rowLine
+            return this.rowLine.CompareTo(altraRiga.rowLine);
         }
 
         public override string ToString()
@@ -172,7 +209,9 @@ namespace GestioneOrdini
             sToRet += $"DiscountFormula: {rowDiscountFormula}\t";
             sToRet += $"DiscountAmount: {rowDiscountAmount}\t";
             sToRet += $"SaleOrdId: {rowSaleOrdId}\t";
-            sToRet += $"Notes: {rowNotes}\n";
+            sToRet += $"Notes: {rowNotes}\t";
+            sToRet += $"Lotto: {rowLotto}\t";
+            sToRet += $"Elementi Lotto: {rowElementiLotto}\n";
 
             return sToRet;
         }

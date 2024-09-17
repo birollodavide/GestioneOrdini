@@ -22,7 +22,7 @@ namespace GestioneOrdini
             Application.Run(new Form1());
         }
 
-        public static void DaSistemare(string sValore)
+        /*public static void DaSistemare(string sValore)
         {
             ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
             int tbPort = myWebService.LoginMago(5);
@@ -127,6 +127,6 @@ namespace GestioneOrdini
                 }
                 myWebService.LogoutMago();
             }
-        }
+        }*/
     }
 }
