@@ -83,7 +83,7 @@ namespace GestioneOrdini
             dgvPickingPage.Columns[12].HeaderText = "Lotto";
             dgvPickingPage.Columns[13].HeaderText = "Elementi Lotto";
             dgvPickingPage.Columns[14].Visible = false;
-            dgvPickingPage.Columns[15].Visible = false;
+            //dgvPickingPage.Columns[15].Visible = false;
 
             //Nascondo le righe descrittive
             foreach (DocRighe dr in doc.Righe)
@@ -391,6 +391,7 @@ namespace GestioneOrdini
         }
         private async void btnLoad_Click(object sender, EventArgs e)
         {
+            tabControl1.SelectedIndex = (tabControl1.SelectedIndex + 1) % tabControl1.TabCount;
             await Task.Run(() => CreaDocumento_PickingPage());
 
             caricaTabellaPickingPage();
@@ -439,7 +440,7 @@ namespace GestioneOrdini
 
             for(int i = 0; i < dgvPickingPage.Rows.Count - 1; i++)
             {
-                if (Int32.Parse(dgvPickingPage.Rows[i].Cells["RowQty"].Value.ToString()) > Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()))
+                if (Int32.Parse(dgvPickingPage.Rows[i].Cells["RowQty"].Value.ToString()) > Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) && Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) != 0)
                 {
                     doc.Righe[i].Stato = 3;
                 }
