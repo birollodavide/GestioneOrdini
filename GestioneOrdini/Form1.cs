@@ -434,10 +434,9 @@ namespace GestioneOrdini
             }
         }
 
+        //Il metodo controlla che non siano stati cambiati valori riguardo alla quantità
         public void checkStato()
         {
-            List<int> erroriStato = new List<int>();
-
             for(int i = 0; i < dgvPickingPage.Rows.Count - 1; i++)
             {
                 if (Int32.Parse(dgvPickingPage.Rows[i].Cells["RowQty"].Value.ToString()) > Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) && Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) != 0)
