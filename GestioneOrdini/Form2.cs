@@ -61,6 +61,8 @@ namespace GestioneOrdini
             form1.dgvPickingPage.Columns[12].Visible = true;
             form1.dgvPickingPage.Columns[13].HeaderText = "Elementi Lotto";
             form1.dgvPickingPage.Columns[13].Visible = true;
+            form1.dgvPickingPage.Columns[14].Visible = false;
+            form1.dgvPickingPage.Columns[15].Visible = false;
 
             //Nascondo le righe descrittive
             foreach (DocRighe dr in form1.doc.Righe)
@@ -73,6 +75,8 @@ namespace GestioneOrdini
 
             form1.dgvPickingPage.Update();
             form1.dgvPickingPage.Refresh();
+
+            form1.coloraTabella();
         }
 
         private void btnAddLotto_Click(object sender, EventArgs e)
@@ -90,6 +94,7 @@ namespace GestioneOrdini
                     DocRighe dr = form1.doc.Righe.Find(a => a.RowLine == n);
                     dr.RowLotto = nLotto;
                     dr.RowElementiLotto = nElementiLotto;
+                    dr.Stato = 1;
                 }
                 else
                 {
@@ -100,12 +105,13 @@ namespace GestioneOrdini
                     dr.RowElementiLotto = nElementiLotto;
                     int qtyOriginale = Int32.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString());
                     dr.RowQty = nElementiLotto;
+                    dr.Stato = 1;
 
                     int qtyModificata = qtyOriginale - nElementiLotto;
                     n++;
                     dr2.RowLine = n;
                     dr2.RowQty = qtyModificata;
-                    
+                    dr2.Stato = 2;
                     form1.doc.Righe.Add(dr2);
 
                     //scalare tutti i RowLine della lista tranne l'ultimo e poi ordinarla in base al RowLine

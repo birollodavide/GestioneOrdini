@@ -22,6 +22,7 @@ namespace GestioneOrdini
         private string rowNotes;
         private string rowLotto;
         private int rowElementiLotto;
+        private int stato;
 
         public int RowLine
         {
@@ -177,7 +178,23 @@ namespace GestioneOrdini
                 rowElementiLotto = value;
             }
         }
-        
+        public int Stato
+        {
+            get
+            {
+                return stato;
+            }
+            set
+            {
+                /*
+                 * Se stato == 1 è stato ritirato del tutto
+                 * Se stato == 2 non è stato ritirato del tutto
+                 * Se stato == 3 è stato ritirato più del dovuto
+                 */
+                stato = value;
+            }
+        }
+
         public DocRighe()
         {
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Web.Services;
@@ -81,6 +82,8 @@ namespace GestioneOrdini
             dgvPickingPage.Columns[11].HeaderText = "Note";
             dgvPickingPage.Columns[12].HeaderText = "Lotto";
             dgvPickingPage.Columns[13].HeaderText = "Elementi Lotto";
+            dgvPickingPage.Columns[14].Visible = false;
+            dgvPickingPage.Columns[15].Visible = false;
 
             //Nascondo le righe descrittive
             foreach (DocRighe dr in doc.Righe)
@@ -91,6 +94,8 @@ namespace GestioneOrdini
                 }
             }
             dgvPickingPage.Refresh();
+
+            coloraTabella();
         }
         
 
@@ -403,6 +408,42 @@ namespace GestioneOrdini
             doc.Righe.RemoveAt(i);
 
             caricaTabellaPickingPage();
+        }
+
+        public void coloraTabella()
+        {
+            checkStato();
+            for (int i = 0; i < dgvPickingPage.Rows.Count - 1; i++)
+            {
+                if (doc.Righe[i].Stato == 1)
+                {
+                    //Colore verde
+                    dgvPickingPage.Rows[i].DefaultCellStyle.BackColor = Color.Green;
+                }
+                else if (doc.Righe[i].Stato == 2)
+                {
+                    //Colore giallo
+                    dgvPickingPage.Rows[i].DefaultCellStyle.BackColor = Color.Yellow;
+                }
+                else if (doc.Righe[i].Stato == 3)
+                {
+                    //Colore rosso
+                    dgvPickingPage.Rows[i].DefaultCellStyle.BackColor = Color.Red;
+                }
+            }
+        }
+
+        public void checkStato()
+        {
+            List<int> erroriStato = new List<int>();
+
+            for(int i = 0; i < dgvPickingPage.Rows.Count - 1; i++)
+            {
+                if (Int32.Parse(dgvPickingPage.Rows[i].Cells["RowQty"].Value.ToString()) > Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()))
+                {
+                    doc.Righe[i].Stato = 3;
+                }
+            }
         }
     }
 }
