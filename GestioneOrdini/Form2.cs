@@ -16,20 +16,33 @@ namespace GestioneOrdini
     {
         private Form1 form1 = new Form1();
         private double nElementiLotto = 0;
-        bool mostra = false;
-        public Form2(Form1 f, double nElementiLotto)
+        private String numLotto;
+        bool mostraElementiLotto = false;
+        bool mostraNumLotto = false;
+
+        public Form2(Form1 f, double nElementiLotto, String numLotto)
         {
             InitializeComponent();
             form1 = f;
             if (nElementiLotto > 0)
                 this.nElementiLotto = nElementiLotto;
             else
-                mostra = true;
+                mostraElementiLotto = true;
 
-            if(!mostra)
+            if (numLotto != "")
+                this.numLotto = numLotto;
+            else
+                mostraNumLotto = true;
+
+            if(!mostraElementiLotto)
             {
                 label3.Visible = false;
                 txtElementiLotto.Visible = false;
+            }
+            if (!mostraNumLotto)
+            {
+                label2.Visible = false;
+                txtScriviLotto.Visible = false;
             }
         }
 
@@ -91,11 +104,14 @@ namespace GestioneOrdini
 
         private void btnAddLotto_Click(object sender, EventArgs e)
         {
-            String nLotto = txtScriviLotto.Text;
+            String nLotto = "";
+
+            if (mostraNumLotto) nLotto = txtScriviLotto.Text;
+            else nLotto = numLotto;
 
             if (form1.dgvPickingPage.SelectedRows.Count > 0)
             {
-                if(mostra) nElementiLotto = Double.Parse(txtElementiLotto.Text);
+                if(mostraElementiLotto) nElementiLotto = Double.Parse(txtElementiLotto.Text);
                 int nRiga = form1.dgvPickingPage.SelectedRows[0].Index;
 
                 int n = nRiga;

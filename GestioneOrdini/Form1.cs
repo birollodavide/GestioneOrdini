@@ -436,7 +436,7 @@ namespace GestioneOrdini
 
         private void btnAddLotto_Click(object sender, EventArgs e)
         {
-            Form2 form2 = new Form2(this, 0);
+            Form2 form2 = new Form2(this, 0, "");
             form2.Show();
         }
 
@@ -494,67 +494,125 @@ namespace GestioneOrdini
                 txtBarcode.Enabled = true;
         }
 
-        private void txtBarcode_TextChanged(object sender, EventArgs e)
+        private void txtBarcode_KeyDown(object sender, KeyEventArgs e)
         {
-            String barcodeString = txtBarcode.Text, numOrdine = "", Item = "";
-            double peso = 0;
-            bool errore = false;
-
-            barcodeString = "01980574578200523103010056152405221010178G";
-
-            if (barcodeString.Length == 13)
+            if(e.KeyCode == Keys.Enter)
             {
-                //Barcode corto
-                numOrdine = barcodeString.Substring(0, 7);
-                String p = barcodeString.Substring(7, 5);
-                peso = Double.Parse(p);
+                String barcodeString = txtBarcode.Text, numOrdine = "", Item = "", numLotto = "";
+                double Peso = 0;
+                bool errore = false;
 
-                //Aggiungo la virgola a n
-                peso /= 1000;
-
-                //Gestione SQL server
-                SqlConnection sqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
-                String query = $"select * from MA_ItemsPurchaseBarCode where barcode = '{numOrdine}'";
-                SqlCommand command = new SqlCommand(query, sqlConn);
-
-                sqlConn.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                if (barcodeString.Length == 13)
                 {
-                    //Caso in cui esiste il numero ordine
-                    Item = reader.GetValue(0).ToString();
-                    sqlConn.Close();
-                }
-                else
-                {
-                    //Caso in cui non esiste il numero ordine e devo usare l'intero barcode
-                    sqlConn.Close();
+                    //Barcode corto
+                    numOrdine = barcodeString.Substring(0, 7);
+                    String p = barcodeString.Substring(7, 5);
+                    Peso = Double.Parse(p);
 
-                    SqlConnection newSqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
-                    String newQuery = $"select * from MA_ItemsPurchaseBarCode where barcode = '{barcodeString}'";
-                    SqlCommand newCommand = new SqlCommand(newQuery, newSqlConn);
+                    //Aggiungo la virgola a n
+                    Peso /= 1000;
 
-                    newSqlConn.Open();
-                    SqlDataReader newReader = newCommand.ExecuteReader();
+                    //Gestione SQL server
+                    SqlConnection sqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
+                    String query = $"select * from MA_ItemsPurchaseBarCode where barcode = '{numOrdine}'";
+                    SqlCommand command = new SqlCommand(query, sqlConn);
 
-                    if (newReader.Read())
+                    sqlConn.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.Read())
                     {
-                        Item = newReader.GetValue(0).ToString();
-                        peso = 0;                           //In questo modo viene richiesto il peso all'utente
+                        //Caso in cui esiste il numero ordine
+                        Item = reader.GetValue(0).ToString();
+                        sqlConn.Close();
                     }
                     else
                     {
-                        //Errore
-                        errore = true;
+                        //Caso in cui non esiste il numero ordine e devo usare l'intero barcode
+                        sqlConn.Close();
+
+                        SqlConnection newSqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
+                        String newQuery = $"select * from MA_ItemsPurchaseBarCode where barcode = '{barcodeString}'";
+                        SqlCommand newCommand = new SqlCommand(newQuery, newSqlConn);
+
+                        newSqlConn.Open();
+                        SqlDataReader newReader = newCommand.ExecuteReader();
+
+                        if (newReader.Read())
+                        {
+                            Item = newReader.GetValue(0).ToString();
+                            Peso = 0;                           //In questo modo viene richiesto il peso all'utente
+                        }
+                        else
+                        {
+                            //Errore
+                            errore = true;
+                        }
+
+                        newSqlConn.Close();
                     }
 
-                    newSqlConn.Close();
-                }
+                    if (!errore)
+                    {
+                        Form2 form2 = new Form2(this, Peso, "");
 
-                if (!errore)
+                        for (int i = 0; i < dgvPickingPage.RowCount - 1; i++)
+                        {
+                            if (dgvPickingPage.Rows[i].Cells["RowItem"].Value.ToString() == Item)
+                                dgvPickingPage.Rows[i].Selected = true;
+                        }
+
+                        form2.Show();
+                    }
+                    else
+                    {
+                        //Mostro a video la box di errore
+                        MessageBox.Show("Errore nella lettura del barcode!");
+                    }
+
+                }
+                else if (barcodeString.Length > 13)
                 {
-                    Form2 form2 = new Form2(this, peso);
+                    //Barcode lungo
+                    //Controllo che non ci siano le partentesi altrimenti le tolgo
+                    if (barcodeString.Contains("("))
+                    {
+                        barcodeString = RemoveParentheses(barcodeString);
+                    }
+
+                    bool throwException = false;
+                    Dictionary<AII, string> result = Parse(barcodeString, throwException);
+
+                    String p = "";
+
+                    foreach (var sottoStringa in result)
+                    {
+                        if (sottoStringa.Key.AI == "01")
+                            numOrdine = sottoStringa.Value;
+                        else if (sottoStringa.Key.AI == "10")
+                            numLotto = sottoStringa.Value;
+                        else if (sottoStringa.Key.AI == "310d")
+                            p = sottoStringa.Value;
+                    }
+
+                    Peso = Double.Parse(p);
+                    Peso /= 1000;
+
+                    //Gestione SQL server
+                    SqlConnection sqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
+                    String query = $"select * from MA_ItemsPurchaseBarCode where barcode = '{numOrdine}'";
+                    SqlCommand command = new SqlCommand(query, sqlConn);
+
+                    sqlConn.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        Item = reader.GetValue(0).ToString();
+                        sqlConn.Close();
+                    }
+
+                    Form2 form2 = new Form2(this, Peso, numLotto);
 
                     for (int i = 0; i < dgvPickingPage.RowCount - 1; i++)
                     {
@@ -564,36 +622,6 @@ namespace GestioneOrdini
 
                     form2.Show();
                 }
-                else
-                {
-                    //Mostro a video la box di errore
-                    MessageBox.Show("Errore nella lettura del barcode!");
-                }
-
-            }
-            else if (barcodeString.Length > 13)
-            {
-                //Barcode lungo
-                //Controllo che non ci siano le partentesi altrimenti le tolgo
-                if (barcodeString.Contains("("))
-                {
-                    barcodeString = RemoveParentheses(barcodeString);
-                }
-
-                bool throwException = false;
-                Dictionary<AII, string> result = Parse(barcodeString, throwException);
-
-                List<string> barcodeSpacchettato = new List<string>();
-
-                foreach(var item in result)
-                {
-                    String S = "";
-                    S += item.Key;
-                    S += ": ";
-                    S += item.Value;
-                    barcodeSpacchettato.Add(S);
-                }
-
             }
         }
 

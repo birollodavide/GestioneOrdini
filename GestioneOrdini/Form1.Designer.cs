@@ -207,7 +207,7 @@
             this.txtBarcode.Size = new System.Drawing.Size(256, 20);
             this.txtBarcode.TabIndex = 50;
             this.txtBarcode.EnabledChanged += new System.EventHandler(this.textBox1_EnabledChanged);
-            this.txtBarcode.TextChanged += new System.EventHandler(this.txtBarcode_TextChanged);
+            this.txtBarcode.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtBarcode_KeyDown);
             // 
             // label3
             // 
