@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Services;
 using System.Windows.Forms;
@@ -22,82 +25,105 @@ namespace GestioneOrdini
 
         private void caricaTabellaOrdini()
         {
-            if (doc.Righe != null)
+            try
             {
-                var source = new BindingSource();
-                source.DataSource = doc.Righe;
-                dgvTabella.DataSource = source;
-            }
+                if (doc.Righe != null)
+                {
+                    var source = new BindingSource();
+                    source.DataSource = doc.Righe;
+                    dgvTabella.DataSource = source;
+                }
 
-            dgvTabella.Columns[0].HeaderText = "Riga";
-            dgvTabella.Columns[0].ReadOnly = true;
-            dgvTabella.Columns[1].HeaderText = "Posizione";
-            dgvTabella.Columns[1].Visible = false;
-            dgvTabella.Columns[2].HeaderText = "Tipo Riga";
-            dgvTabella.Columns[3].HeaderText = "Descrizione";
-            dgvTabella.Columns[4].HeaderText = "Articolo";
-            dgvTabella.Columns[4].ReadOnly = true;
-            dgvTabella.Columns[5].HeaderText = "UM";
-            dgvTabella.Columns[5].ReadOnly = true;
-            dgvTabella.Columns[6].HeaderText = "Qtà";
-            dgvTabella.Columns[7].HeaderText = "Valore Unitario";
-            dgvTabella.Columns[7].ReadOnly = true;
-            dgvTabella.Columns[8].HeaderText = "Sconto";
-            dgvTabella.Columns[9].HeaderText = "Quantità scontata";
-            dgvTabella.Columns[9].ReadOnly = true;
-            dgvTabella.Columns[10].HeaderText = "ID";
-            dgvTabella.Columns[10].Visible = false;
-            dgvTabella.Columns[11].HeaderText = "Notes";
-            dgvTabella.Columns[12].Visible = false;
-            dgvTabella.Columns[13].Visible = false;
+                dgvTabella.Columns[0].HeaderText = "Riga";
+                dgvTabella.Columns[0].ReadOnly = true;
+                dgvTabella.Columns[1].HeaderText = "Posizione";
+                dgvTabella.Columns[1].Visible = false;
+                dgvTabella.Columns[2].HeaderText = "Tipo Riga";
+                dgvTabella.Columns[3].HeaderText = "Descrizione";
+                dgvTabella.Columns[4].HeaderText = "Articolo";
+                dgvTabella.Columns[4].ReadOnly = true;
+                dgvTabella.Columns[5].HeaderText = "UM";
+                dgvTabella.Columns[5].ReadOnly = true;
+                dgvTabella.Columns[6].HeaderText = "Qtà";
+                dgvTabella.Columns[7].HeaderText = "Valore Unitario";
+                dgvTabella.Columns[7].ReadOnly = true;
+                dgvTabella.Columns[8].HeaderText = "Sconto";
+                dgvTabella.Columns[9].HeaderText = "Quantità scontata";
+                dgvTabella.Columns[9].ReadOnly = true;
+                dgvTabella.Columns[10].HeaderText = "ID";
+                dgvTabella.Columns[10].Visible = false;
+                dgvTabella.Columns[11].HeaderText = "Notes";
+                dgvTabella.Columns[12].Visible = false;
+                dgvTabella.Columns[13].Visible = false;
+                dgvTabella.Columns[14].Visible = false;
+            }
+            catch (NullReferenceException ex)
+            {
+                Form1 form1 = new Form1();
+                form1.lblRicerca.Visible = true;
+                form1.lblRicerca.Text = "Errore nella ricerca!";
+                Wait(2000);
+                form1.lblRicerca.Visible = false;
+                form1.lblRicerca.Text = "Sto cercando...";
+            }
         }
         private void caricaTabellaPickingPage()
         {
-            if (doc.Righe != null)
+            try
             {
-                var source = new BindingSource();
-                source.DataSource = doc.Righe;
-                dgvPickingPage.DataSource = source;
-            }
-
-            dgvPickingPage.Columns[0].HeaderText = "Riga";
-            dgvPickingPage.Columns[0].ReadOnly = true;
-            dgvPickingPage.Columns[1].HeaderText = "Posizione";
-            dgvPickingPage.Columns[1].Visible = false;
-            dgvPickingPage.Columns[2].HeaderText = "Tipo Riga";
-            dgvPickingPage.Columns[3].HeaderText = "Descrizione";
-            dgvPickingPage.Columns[4].HeaderText = "Articolo";
-            dgvPickingPage.Columns[4].ReadOnly = true;
-            dgvPickingPage.Columns[5].HeaderText = "UM";
-            dgvPickingPage.Columns[5].ReadOnly = true;
-            dgvPickingPage.Columns[6].HeaderText = "Qtà";
-            dgvPickingPage.Columns[7].HeaderText = "Valore Unitario";
-            dgvPickingPage.Columns[7].Visible = false;
-            dgvPickingPage.Columns[8].HeaderText = "Sconto";
-            dgvPickingPage.Columns[8].Visible = false;
-            dgvPickingPage.Columns[9].HeaderText = "Quantità scontata";
-            dgvPickingPage.Columns[9].Visible = false;
-            dgvPickingPage.Columns[10].HeaderText = "ID";
-            dgvPickingPage.Columns[10].Visible = false;
-            dgvPickingPage.Columns[11].HeaderText = "Note";
-            dgvPickingPage.Columns[12].HeaderText = "Lotto";
-            dgvPickingPage.Columns[13].HeaderText = "Elementi Lotto";
-            dgvPickingPage.Columns[14].Visible = false;
-            //dgvPickingPage.Columns[15].Visible = false;
-
-            //Nascondo le righe descrittive
-            foreach (DocRighe dr in doc.Righe)
-            {
-                if (dr.RowLineType.Equals("Descrittiva"))
+                if (doc.Righe != null)
                 {
-                    dgvPickingPage.Rows[dr.RowLine - 1].Visible = false;
+                    var source = new BindingSource();
+                    source.DataSource = doc.Righe;
+                    dgvPickingPage.DataSource = source;
                 }
-            }
-            dgvPickingPage.Refresh();
 
-            coloraTabella();
+                dgvPickingPage.Columns[0].HeaderText = "Riga";
+                dgvPickingPage.Columns[0].ReadOnly = true;
+                dgvPickingPage.Columns[1].HeaderText = "Posizione";
+                dgvPickingPage.Columns[1].Visible = false;
+                dgvPickingPage.Columns[2].HeaderText = "Tipo Riga";
+                dgvPickingPage.Columns[3].HeaderText = "Descrizione";
+                dgvPickingPage.Columns[4].HeaderText = "Articolo";
+                dgvPickingPage.Columns[4].ReadOnly = true;
+                dgvPickingPage.Columns[5].HeaderText = "UM";
+                dgvPickingPage.Columns[5].ReadOnly = true;
+                dgvPickingPage.Columns[6].HeaderText = "Qtà";
+                dgvPickingPage.Columns[7].HeaderText = "Valore Unitario";
+                dgvPickingPage.Columns[7].Visible = false;
+                dgvPickingPage.Columns[8].HeaderText = "Sconto";
+                dgvPickingPage.Columns[8].Visible = false;
+                dgvPickingPage.Columns[9].HeaderText = "Quantità scontata";
+                dgvPickingPage.Columns[9].Visible = false;
+                dgvPickingPage.Columns[10].HeaderText = "ID";
+                dgvPickingPage.Columns[10].Visible = false;
+                dgvPickingPage.Columns[11].HeaderText = "Note";
+                dgvPickingPage.Columns[12].HeaderText = "Lotto";
+                dgvPickingPage.Columns[13].HeaderText = "Elementi Lotto";
+                dgvPickingPage.Columns[14].Visible = false;
+
+                //Nascondo le righe descrittive
+                foreach (DocRighe dr in doc.Righe)
+                {
+                    if (dr.RowLineType.Equals("Descrittiva"))
+                    {
+                        dgvPickingPage.Rows[dr.RowLine - 1].Visible = false;
+                    }
+                }
+                dgvPickingPage.Refresh();
+
+                coloraTabella();
+            }
+            catch (NullReferenceException ex)
+            {
+                Form1 form1 = new Form1();
+                form1.lblRicerca.Visible = true;
+                form1.lblRicerca.Text = "Errore nella ricerca!";
+                Wait(2000);
+                form1.lblRicerca.Visible = false;
+                form1.lblRicerca.Text = "Sto cercando...";
+            }
         }
-        
 
         private async void txtNumOrdine_KeyDown(object sender, KeyEventArgs e)
         {
@@ -125,7 +151,7 @@ namespace GestioneOrdini
 
         private static DocTesta LeggiDocumento(string sValore)
         {
-            ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
+            ITMago4WS myWebService = new ITMago4WS("TestBarcode", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
             int tbPort = myWebService.LoginMago(5);
             GestioneOrdini.DocTesta docTesta = new GestioneOrdini.DocTesta();
             List<Object> listFinale = new List<Object>();
@@ -158,6 +184,7 @@ namespace GestioneOrdini
                         XmlNamespaceManager nsmSchema = new XmlNamespaceManager(xDoc.NameTable);
                         nsmSchema.AddNamespace(xDoc.DocumentElement.Prefix, xDoc.DocumentElement.NamespaceURI);
                         XmlElement itemNode = (XmlElement)xDoc.DocumentElement;
+                        
                         if (itemNode != null)
                         {
                             XmlNodeList elInternalOrdNo = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:InternalOrdNo", nsmSchema);
@@ -176,24 +203,36 @@ namespace GestioneOrdini
                             XmlNodeList elShipToAddress = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:ShipToAddress", nsmSchema);
                             XmlNodeList elTBGuid = (XmlNodeList)itemNode.SelectNodes("//maxs:SaleOrder//maxs:TBGuid", nsmSchema);
 
-                            docTesta = new GestioneOrdini.DocTesta
+                            try
                             {
-                                DocNo = elInternalOrdNo[0].InnerText.ToUpper(),
-                                ExternalOrdNo = elExternalOrdNo[0].InnerText,
-                                DocumentDate = elOrderDate[0].InnerText,
-                                ExpectedDeliveryDate = elExpectedDeliveryDate[0].InnerText,
-                                ConfirmedDeliveryDate = elConfirmedDeliveryDate[0].InnerText,
-                                CustSupp = elCustomer[0].InnerText.ToUpper(),
-                                OurReference = elOurReference[0].InnerText,
-                                YourReference = elYourReference[0].InnerText,
-                                Payment = elPayment[0].InnerText,
-                                Currency = elCurrency[0].InnerText,
-                                DocId = Convert.ToInt32(elSaleOrdId_1[0].InnerText.ToUpper()),
-                                AreaManager = elAreaManager[0].InnerText,
-                                CompulsoryDeliveryDate = elCompulsoryDeliveryDate[0].InnerText,
-                                ShipToAddress = elShipToAddress[0].InnerText,
-                                TBGuid = elTBGuid[0].InnerText,
-                            };
+                                docTesta = new GestioneOrdini.DocTesta
+                                {
+                                    DocNo = elInternalOrdNo[0].InnerText.ToUpper(),
+                                    ExternalOrdNo = elExternalOrdNo[0].InnerText,
+                                    DocumentDate = elOrderDate[0].InnerText,
+                                    ExpectedDeliveryDate = elExpectedDeliveryDate[0].InnerText,
+                                    ConfirmedDeliveryDate = elConfirmedDeliveryDate[0].InnerText,
+                                    CustSupp = elCustomer[0].InnerText.ToUpper(),
+                                    OurReference = elOurReference[0].InnerText,
+                                    YourReference = elYourReference[0].InnerText,
+                                    Payment = elPayment[0].InnerText,
+                                    Currency = elCurrency[0].InnerText,
+                                    DocId = Convert.ToInt32(elSaleOrdId_1[0].InnerText.ToUpper()),
+                                    AreaManager = elAreaManager[0].InnerText,
+                                    CompulsoryDeliveryDate = elCompulsoryDeliveryDate[0].InnerText,
+                                    ShipToAddress = elShipToAddress[0].InnerText,
+                                    TBGuid = elTBGuid[0].InnerText,
+                                };
+                            }
+                            catch (Exception ex)
+                            {
+                                Form1 form1 = new Form1();
+                                form1.lblRicerca.Visible = true;
+                                form1.lblRicerca.Text = "Errore nella ricerca!";
+                                Wait(2000);
+                                form1.lblRicerca.Visible = false;
+                                form1.lblRicerca.Text = "Sto cercando...";
+                            }
 
                             //importo le righe
                             XmlNodeList elLine = (XmlNodeList)itemNode.SelectNodes("//maxs:Detail//maxs:DetailRow//maxs:Line", nsmSchema);
@@ -260,7 +299,7 @@ namespace GestioneOrdini
         private void CreaDocumento_Ordini()
         {
             string xmlDoc = "";
-            ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
+            ITMago4WS myWebService = new ITMago4WS("TestBarcode", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
             int tbPort = myWebService.LoginMago(5);
             
             if(tbPort >= 10000)
@@ -277,7 +316,7 @@ namespace GestioneOrdini
                 xmlDoc += $"<maxs:Customer>{doc.CustSupp}</maxs:Customer>";
                 xmlDoc += $"<maxs:OurReference>{doc.OurReference}</maxs:OurReference>";
                 xmlDoc += $"<maxs:YourReference>{doc.YourReference}</maxs:YourReference>";
-                xmlDoc += $"<maxs:Payment>{doc.Payment}</maxs:Payment>";
+                xmlDoc += $"<maxs:Payment>{doc.Payment}</maxs:Payment>"; 
                 xmlDoc += $"<maxs:Currency>{doc.Currency}</maxs:Currency>";
                 xmlDoc += $"<maxs:AreaManager>{doc.AreaManager}</maxs:AreaManager>";
                 xmlDoc += $"<maxs:SaleOrdId>{doc.DocId}</maxs:SaleOrdId>";
@@ -305,12 +344,10 @@ namespace GestioneOrdini
                     xmlDoc += $"<maxs:Notes>{a.RowNotes}</maxs:Notes>";
                     xmlDoc += "</maxs:DetailRow>";
                 }
-
                 xmlDoc += "</maxs:Detail>";
                 xmlDoc += "</maxs:Data>";
                 xmlDoc += "</maxs:SaleOrd>";
             }
-
             myWebService.aTbService.SetData(myWebService.AuthenticationToken, xmlDoc, DateTime.Now, 0, true, out string sResult);
             myWebService.LogoutMago();
         }
@@ -318,7 +355,7 @@ namespace GestioneOrdini
         private void CreaDocumento_PickingPage()
         {
             string xmlDoc = "";
-            ITMago4WS myWebService = new ITMago4WS("AziendaDemo", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
+            ITMago4WS myWebService = new ITMago4WS("TestBarcode", "localhost", "80", "mago4", "sa", "itech", "GestioneOrdini");
             int tbPort = myWebService.LoginMago(5);
 
             if (tbPort >= 10000)
@@ -355,12 +392,10 @@ namespace GestioneOrdini
                     xmlDoc += $"<maxs:Notes>{a.RowNotes}</maxs:Notes>";
                     xmlDoc += "</maxs:DetailRow>";
                 }
-
                 xmlDoc += "</maxs:Detail>";
                 xmlDoc += "</maxs:Data>";
                 xmlDoc += "</maxs:PickingList>";
             }
-
             myWebService.aTbService.SetData(myWebService.AuthenticationToken, xmlDoc, DateTime.Now, 0, true, out string sResult);
             myWebService.LogoutMago();
         }
@@ -369,19 +404,19 @@ namespace GestioneOrdini
         {
             switch (n)
             {
-                case 3538944:
+                case 03538944:
                     return "Nota";
                     break;
-                case 3538945:
+                case 03538945:
                     return "Riferimento";
                     break;
-                case 3538946:
+                case 03538946:
                     return "Servizio";
                     break;
-                case 3538947:
+                case 03538947:
                     return "Merce";
                     break;
-                case 3538948:
+                case 03538948:
                     return "Descrittiva";
                     break;
                 default:
@@ -389,6 +424,7 @@ namespace GestioneOrdini
                     break;
             }
         }
+
         private async void btnLoad_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedIndex = (tabControl1.SelectedIndex + 1) % tabControl1.TabCount;
@@ -399,7 +435,7 @@ namespace GestioneOrdini
 
         private void btnAddLotto_Click(object sender, EventArgs e)
         {
-            Form2 form2 = new Form2(this);
+            Form2 form2 = new Form2(this, 0);
             form2.Show();
         }
 
@@ -439,11 +475,105 @@ namespace GestioneOrdini
         {
             for(int i = 0; i < dgvPickingPage.Rows.Count - 1; i++)
             {
-                if (Int32.Parse(dgvPickingPage.Rows[i].Cells["RowQty"].Value.ToString()) > Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) && Int32.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) != 0)
+                if (Double.Parse(dgvPickingPage.Rows[i].Cells["RowQty"].Value.ToString()) > Double.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) && Double.Parse(dgvPickingPage.Rows[i].Cells["RowElementiLotto"].Value.ToString()) != 0)
                 {
                     doc.Righe[i].Stato = 3;
                 }
             }
         }
+
+        private static async void Wait(int n)
+        {
+            await Task.Delay(n);
+        }
+
+        private void textBox1_EnabledChanged(object sender, EventArgs e)
+        {
+            if (txtNumOrdine.Enabled == false)
+                txtBarcode.Enabled = true;
+        }
+
+        private void txtBarcode_KeyDown(object sender, KeyEventArgs e)
+        {
+            String barcode = txtBarcode.Text, numOrdine = "", Item = "";
+            double peso = 0;
+            if (barcode.Length == 13)
+            {
+                //Barcode corto
+                numOrdine = barcode.Substring(0, 7);
+                String p = barcode.Substring(7, 5);
+                peso = Double.Parse(p);
+
+                //Aggiungo la virgola a n
+                peso /= 1000;
+
+                //Gestione SQL server
+                SqlConnection sqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
+                String query = $"select * from MA_ItemsPurchaseBarCode where barcode = '{numOrdine}'";
+                SqlCommand command = new SqlCommand(query, sqlConn);
+
+                sqlConn.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    //Caso in cui esiste il numero ordine
+                    Item = reader.GetValue(0).ToString();
+                    sqlConn.Close();
+                }
+                else
+                {
+                    //Caso in cui non esiste il numero ordine e devo usare l'intero barcode
+                    sqlConn.Close();
+
+                    SqlConnection newSqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
+                    String newQuery = $"select * from MA_ItemsPurchaseBarCode where barcode = '{barcode}'";
+                    SqlCommand newCommand = new SqlCommand(newQuery, newSqlConn);
+
+                    newSqlConn.Open();
+                    SqlDataReader newReader = newCommand.ExecuteReader();
+
+                    if (newReader.Read())
+                    {
+                        Item = newReader.GetValue(0).ToString();
+                        peso = 0;                           //In questo modo viene richiesto il peso all'utente
+                    }
+                    else
+                    {
+                        //Errore
+                        txtBarcode.Text = "Errore nella lettura del barcode";
+                    }
+
+                    newSqlConn.Close();
+                }
+
+                Form2 form2 = new Form2(this, peso);
+                
+                for(int i = 0; i < dgvPickingPage.RowCount - 1; i++)
+                {
+                    if (dgvPickingPage.Rows[i].Cells["RowItem"].Value.ToString() == Item)
+                        dgvPickingPage.Rows[i].Selected = true;
+                }
+
+                form2.Show();
+            }
+            else if (barcode.Length > 13)
+            {
+                //Barcode lungo
+                //Controllo che non ci siano le partentesi altrimenti le tolgo
+                if (barcode.Contains("("))
+                {
+                    barcode = RemoveParentheses(barcode);
+                }
+
+                
+            }
+
+        }
+
+        private String RemoveParentheses(String S)
+        {
+            return Regex.Replace(S, "[()]", "");
+        } 
     }
 }

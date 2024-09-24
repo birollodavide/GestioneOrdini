@@ -43,6 +43,8 @@
             this.btnAddLotto = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.btnElimina = new System.Windows.Forms.Button();
+            this.txtBarcode = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTabella)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -193,11 +195,31 @@
             this.btnElimina.UseVisualStyleBackColor = true;
             this.btnElimina.Click += new System.EventHandler(this.button1_Click);
             // 
+            // txtBarcode
+            // 
+            this.txtBarcode.Location = new System.Drawing.Point(1112, 464);
+            this.txtBarcode.Name = "txtBarcode";
+            this.txtBarcode.Size = new System.Drawing.Size(256, 20);
+            this.txtBarcode.TabIndex = 12;
+            this.txtBarcode.EnabledChanged += new System.EventHandler(this.textBox1_EnabledChanged);
+            this.txtBarcode.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtBarcode_KeyDown);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(1112, 439);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(50, 13);
+            this.label3.TabIndex = 13;
+            this.label3.Text = "Barcode:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1380, 556);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtBarcode);
             this.Controls.Add(this.btnElimina);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnAddLotto);
@@ -238,5 +260,7 @@
         private System.Windows.Forms.Button btnAddLotto;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnElimina;
+        public System.Windows.Forms.TextBox txtBarcode;
+        private System.Windows.Forms.Label label3;
     }
 }

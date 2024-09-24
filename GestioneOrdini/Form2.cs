@@ -15,10 +15,22 @@ namespace GestioneOrdini
     public partial class Form2 : Form
     {
         private Form1 form1 = new Form1();
-        public Form2(Form1 f)
+        private double nElementiLotto = 0;
+        bool mostra = false;
+        public Form2(Form1 f, double nElementiLotto)
         {
             InitializeComponent();
             form1 = f;
+            if (nElementiLotto > 0)
+                this.nElementiLotto = nElementiLotto;
+            else
+                mostra = true;
+
+            if(!mostra)
+            {
+                label3.Visible = false;
+                txtElementiLotto.Visible = false;
+            }
         }
 
         private void caricaTabellaLotto()
@@ -62,7 +74,6 @@ namespace GestioneOrdini
             form1.dgvPickingPage.Columns[13].HeaderText = "Elementi Lotto";
             form1.dgvPickingPage.Columns[13].Visible = true;
             form1.dgvPickingPage.Columns[14].Visible = false;
-            form1.dgvPickingPage.Columns[15].Visible = false;
 
             //Nascondo le righe descrittive
             foreach (DocRighe dr in form1.doc.Righe)
@@ -72,7 +83,6 @@ namespace GestioneOrdini
                     form1.dgvPickingPage.Rows[dr.RowLine - 1].Visible = false;
                 }
             }
-
             form1.dgvPickingPage.Update();
             form1.dgvPickingPage.Refresh();
 
@@ -81,10 +91,12 @@ namespace GestioneOrdini
 
         private void btnAddLotto_Click(object sender, EventArgs e)
         {
+            String nLotto = txtScriviLotto.Text;
+
             if (form1.dgvPickingPage.SelectedRows.Count > 0)
             {
-                int nRiga = form1.dgvPickingPage.SelectedRows[0].Index, nElementiLotto = Int32.Parse(txtElementiLotto.Text);
-                string nLotto = txtScriviLotto.Text;
+                if(mostra) nElementiLotto = Double.Parse(txtElementiLotto.Text);
+                int nRiga = form1.dgvPickingPage.SelectedRows[0].Index;
 
                 int n = nRiga;
                 n++;
@@ -103,11 +115,11 @@ namespace GestioneOrdini
                     
                     dr.RowLotto = nLotto;
                     dr.RowElementiLotto = nElementiLotto;
-                    int qtyOriginale = Int32.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString());
+                    double qtyOriginale = Int32.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString());
                     dr.RowQty = nElementiLotto;
                     dr.Stato = 1;
 
-                    int qtyModificata = qtyOriginale - nElementiLotto;
+                    double qtyModificata = qtyOriginale - nElementiLotto;
                     n++;
                     dr2.RowLine = n;
                     dr2.RowQty = qtyModificata;
@@ -124,12 +136,11 @@ namespace GestioneOrdini
                         }
                     }
                     form1.doc.Righe.Sort();
-                    
                 }
-
                 caricaTabellaLotto();
-                Hide();
             }
+            Hide();
+            form1.txtBarcode.Text = "";
         }
     }
 }

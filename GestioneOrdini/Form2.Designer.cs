@@ -66,9 +66,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(12, 70);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(113, 13);
+            this.label3.Size = new System.Drawing.Size(112, 13);
             this.label3.TabIndex = 5;
-            this.label3.Text = "Inserisci elementi lotto:";
+            this.label3.Text = "Inserisci quantità lotto:";
             // 
             // txtElementiLotto
             // 

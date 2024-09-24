@@ -21,7 +21,7 @@ namespace GestioneOrdini
         private int rowSaleOrdId;
         private string rowNotes;
         private string rowLotto;
-        private int rowElementiLotto;
+        private double rowElementiLotto;
         private int stato;
 
         public int RowLine
@@ -167,7 +167,7 @@ namespace GestioneOrdini
                 rowLotto = value;
             }
         }
-        public int RowElementiLotto
+        public double RowElementiLotto
         {
             get
             {
