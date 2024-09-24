@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Barcode.cs" />
     <Compile Include="DocRighe.cs" />
     <Compile Include="DocTesta.cs" />
     <Compile Include="Form1.cs">

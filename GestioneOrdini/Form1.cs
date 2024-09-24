@@ -10,6 +10,7 @@ using System.Web.Services;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
+using static GestioneOrdini.Barcode;
 
 namespace GestioneOrdini
 {
@@ -493,15 +494,19 @@ namespace GestioneOrdini
                 txtBarcode.Enabled = true;
         }
 
-        private void txtBarcode_KeyDown(object sender, KeyEventArgs e)
+        private void txtBarcode_TextChanged(object sender, EventArgs e)
         {
-            String barcode = txtBarcode.Text, numOrdine = "", Item = "";
+            String barcodeString = txtBarcode.Text, numOrdine = "", Item = "";
             double peso = 0;
-            if (barcode.Length == 13)
+            bool errore = false;
+
+            barcodeString = "01980574578200523103010056152405221010178G";
+
+            if (barcodeString.Length == 13)
             {
                 //Barcode corto
-                numOrdine = barcode.Substring(0, 7);
-                String p = barcode.Substring(7, 5);
+                numOrdine = barcodeString.Substring(0, 7);
+                String p = barcodeString.Substring(7, 5);
                 peso = Double.Parse(p);
 
                 //Aggiungo la virgola a n
@@ -527,7 +532,7 @@ namespace GestioneOrdini
                     sqlConn.Close();
 
                     SqlConnection newSqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
-                    String newQuery = $"select * from MA_ItemsPurchaseBarCode where barcode = '{barcode}'";
+                    String newQuery = $"select * from MA_ItemsPurchaseBarCode where barcode = '{barcodeString}'";
                     SqlCommand newCommand = new SqlCommand(newQuery, newSqlConn);
 
                     newSqlConn.Open();
@@ -541,39 +546,60 @@ namespace GestioneOrdini
                     else
                     {
                         //Errore
-                        txtBarcode.Text = "Errore nella lettura del barcode";
+                        errore = true;
                     }
 
                     newSqlConn.Close();
                 }
 
-                Form2 form2 = new Form2(this, peso);
-                
-                for(int i = 0; i < dgvPickingPage.RowCount - 1; i++)
+                if (!errore)
                 {
-                    if (dgvPickingPage.Rows[i].Cells["RowItem"].Value.ToString() == Item)
-                        dgvPickingPage.Rows[i].Selected = true;
+                    Form2 form2 = new Form2(this, peso);
+
+                    for (int i = 0; i < dgvPickingPage.RowCount - 1; i++)
+                    {
+                        if (dgvPickingPage.Rows[i].Cells["RowItem"].Value.ToString() == Item)
+                            dgvPickingPage.Rows[i].Selected = true;
+                    }
+
+                    form2.Show();
+                }
+                else
+                {
+                    //Mostro a video la box di errore
+                    MessageBox.Show("Errore nella lettura del barcode!");
                 }
 
-                form2.Show();
             }
-            else if (barcode.Length > 13)
+            else if (barcodeString.Length > 13)
             {
                 //Barcode lungo
                 //Controllo che non ci siano le partentesi altrimenti le tolgo
-                if (barcode.Contains("("))
+                if (barcodeString.Contains("("))
                 {
-                    barcode = RemoveParentheses(barcode);
+                    barcodeString = RemoveParentheses(barcodeString);
                 }
 
-                
-            }
+                bool throwException = false;
+                Dictionary<AII, string> result = Parse(barcodeString, throwException);
 
+                List<string> barcodeSpacchettato = new List<string>();
+
+                foreach(var item in result)
+                {
+                    String S = "";
+                    S += item.Key;
+                    S += ": ";
+                    S += item.Value;
+                    barcodeSpacchettato.Add(S);
+                }
+
+            }
         }
 
         private String RemoveParentheses(String S)
         {
             return Regex.Replace(S, "[()]", "");
-        } 
+        }
     }
 }
