@@ -595,8 +595,12 @@ namespace GestioneOrdini
                             p = sottoStringa.Value;
                     }
 
-                    Peso = Double.Parse(p);
-                    Peso /= 1000;
+                    if (p != "")
+                    {
+                        Peso = Double.Parse(p);
+                        Peso /= 1000;
+                    }
+                    else Peso = 0;
 
                     //Gestione SQL server
                     SqlConnection sqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);

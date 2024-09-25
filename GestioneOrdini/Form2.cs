@@ -117,7 +117,7 @@ namespace GestioneOrdini
                 int n = nRiga;
                 n++;
 
-                if (Int32.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString()) <= nElementiLotto)
+                if (Double.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString()) <= nElementiLotto)
                 {
                     DocRighe dr = form1.doc.Righe.Find(a => a.RowLine == n);
                     dr.RowLotto = nLotto;
@@ -131,7 +131,7 @@ namespace GestioneOrdini
                     
                     dr.RowLotto = nLotto;
                     dr.RowElementiLotto = nElementiLotto;
-                    double qtyOriginale = Int32.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString());
+                    double qtyOriginale = Double.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString());
                     dr.RowQty = nElementiLotto;
                     dr.Stato = 1;
 

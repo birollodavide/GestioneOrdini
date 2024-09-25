@@ -88,7 +88,7 @@ namespace GestioneOrdini
             Add("250", "SerialNumberOfAIntegratedModule", 3, DataType.Alphanumeric, 30, true);
             Add("251", "ReferenceToTheBasisUnit", 3, DataType.Alphanumeric, 30, true);
             Add("252", "GlobalIdentifierSerialisedForTrade", 3, DataType.Numeric, 2, false);
-            Add("30", "AmountInParts", 2, DataType.Numeric, 8, true);
+            Add("30", "AmountInParts", 2, DataType.Numeric, 2, true);
             Add("310d", "NetWeight_Kilogram", 4, DataType.Numeric, 6, false);
             Add("311d", "Length_Meter", 4, DataType.Numeric, 6, false);
             Add("312d", "Width_Meter", 4, DataType.Numeric, 6, false);
