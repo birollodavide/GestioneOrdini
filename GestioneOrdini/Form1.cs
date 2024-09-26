@@ -580,8 +580,8 @@ namespace GestioneOrdini
                         barcodeString = RemoveParentheses(barcodeString);
                     }
 
-                    bool throwException = false;
-                    Dictionary<AII, string> result = Parse(barcodeString, throwException);
+                    Barcode.HasCheckSum = false;
+                    Dictionary<AII, string> result = Parse(barcodeString, false);
 
                     String p = "";
 
@@ -624,7 +624,10 @@ namespace GestioneOrdini
                             dgvPickingPage.Rows[i].Selected = true;
                     }
 
-                    form2.Show();
+                    if (Peso == 0)
+                        form2.Show();
+                    else
+                        form2.inserisciLotto();
                 }
             }
         }

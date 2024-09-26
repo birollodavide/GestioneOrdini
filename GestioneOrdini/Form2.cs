@@ -104,6 +104,12 @@ namespace GestioneOrdini
 
         private void btnAddLotto_Click(object sender, EventArgs e)
         {
+            inserisciLotto();
+            Hide();
+        }
+
+        public void inserisciLotto()
+        {
             String nLotto = "";
 
             if (mostraNumLotto) nLotto = txtScriviLotto.Text;
@@ -111,7 +117,7 @@ namespace GestioneOrdini
 
             if (form1.dgvPickingPage.SelectedRows.Count > 0)
             {
-                if(mostraElementiLotto) nElementiLotto = Double.Parse(txtElementiLotto.Text);
+                if (mostraElementiLotto) nElementiLotto = Double.Parse(txtElementiLotto.Text);
                 int nRiga = form1.dgvPickingPage.SelectedRows[0].Index;
 
                 int n = nRiga;
@@ -128,7 +134,7 @@ namespace GestioneOrdini
                 {
                     DocRighe dr = form1.doc.Righe.Find(a => a.RowLine == n);
                     DocRighe dr2 = dr.ShallowCopy();
-                    
+
                     dr.RowLotto = nLotto;
                     dr.RowElementiLotto = nElementiLotto;
                     double qtyOriginale = Double.Parse(form1.dgvPickingPage.Rows[nRiga].Cells["RowQty"].Value.ToString());
@@ -143,7 +149,7 @@ namespace GestioneOrdini
                     form1.doc.Righe.Add(dr2);
 
                     //scalare tutti i RowLine della lista tranne l'ultimo e poi ordinarla in base al RowLine
-                    for(int i = 0; i < form1.doc.Righe.Count - 1; i++)
+                    for (int i = 0; i < form1.doc.Righe.Count - 1; i++)
                     {
                         if (form1.doc.Righe[i].RowLine >= n)
                         {
@@ -154,9 +160,8 @@ namespace GestioneOrdini
                     form1.doc.Righe.Sort();
                 }
                 caricaTabellaLotto();
+                form1.txtBarcode.Text = "";
             }
-            Hide();
-            form1.txtBarcode.Text = "";
         }
     }
 }
