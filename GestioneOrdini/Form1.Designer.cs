@@ -64,6 +64,8 @@
             this.dgvTabella.Name = "dgvTabella";
             this.dgvTabella.Size = new System.Drawing.Size(1086, 450);
             this.dgvTabella.TabIndex = 0;
+            this.dgvTabella.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dgvTabella_CellBeginEdit);
+            this.dgvTabella.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvTabella_CellValueChanged);
             // 
             // txtNumOrdine
             // 

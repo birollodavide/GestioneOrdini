@@ -237,5 +237,10 @@ namespace GestioneOrdini
 
             return sToRet;
         }
+
+        public DocTesta ShallowCopy()
+        {
+            return (DocTesta)this.MemberwiseClone();
+        }
     }
 }

@@ -17,11 +17,15 @@ namespace GestioneOrdini
     public partial class Form1 : Form
     {
         public DocTesta doc = new DocTesta();
+        private List<UoM> listUoM = new List<UoM>();
+        private String oldValue = "";
+
         public Form1()
         {
             InitializeComponent();
             lblRicerca.Visible = false;
             lblSalvataggio.Visible = false;
+            listUoM.Clear();
         }
 
         private void caricaTabellaOrdini()
@@ -44,7 +48,7 @@ namespace GestioneOrdini
                 dgvTabella.Columns[4].HeaderText = "Articolo";
                 dgvTabella.Columns[4].ReadOnly = true;
                 dgvTabella.Columns[5].HeaderText = "UM";
-                dgvTabella.Columns[5].ReadOnly = true;
+                dgvTabella.Columns[5].ReadOnly = false;
                 dgvTabella.Columns[6].HeaderText = "Qtà";
                 dgvTabella.Columns[7].HeaderText = "Valore Unitario";
                 dgvTabella.Columns[7].ReadOnly = true;
@@ -635,6 +639,119 @@ namespace GestioneOrdini
         private String RemoveParentheses(String S)
         {
             return Regex.Replace(S, "[()]", "");
+        }
+
+        private void prendiDatiUoM(String item)
+        {
+            String baseUoM = "";
+            
+            //Connessione al server per ottenere Item da numOrdine
+            SqlConnection sqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
+            
+            String query = $"select * from MA_Items where item = '{item}'";
+            SqlCommand command = new SqlCommand(query, sqlConn);
+
+            sqlConn.Open();
+
+            SqlDataReader reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                baseUoM = reader["BaseUoM"].ToString();
+            }
+
+            reader.Close();
+
+            query = $"select * from MA_ItemsComparableUoM where item = '{item}'";
+            SqlCommand command2 = new SqlCommand(query, sqlConn);
+            SqlDataReader reader2 = command2.ExecuteReader();
+
+            while (reader2.Read())
+            {
+                UoM um = new UoM();
+                um.ComparableUoM = reader2["ComparableUoM"].ToString();
+                um.BaseUoMQty = Double.Parse(reader2["BaseUoMQty"].ToString());
+                um.CompUoMQty = Int32.Parse(reader2["CompUoMQty"].ToString());
+                listUoM.Add(um);
+            }
+
+            reader2.Close();
+            sqlConn.Close();
+
+            //Per ogni elemento della lista aggiornare l'attributo Item e BaseUoM
+            for (int i = 0; i < listUoM.Count; i++)
+            {
+                listUoM[i].Item = item;
+                listUoM[i].BaseUoM = baseUoM;
+            }
+        }
+
+        private double convertToBase(double Qty)        //La stringa UoM conterrà l'unità di misura dalla quale bisogna convertire
+        {
+            double baseUoMQty = 0;
+
+            foreach (UoM um in listUoM)
+            {
+                if (um.ComparableUoM == oldValue)
+                    baseUoMQty = um.BaseUoMQty;
+            }
+
+            //Quantità ordine (NON unità base) * BaseUoMQty = Quantità ordine (unità base)
+            return Math.Round(Qty * baseUoMQty, 2);
+        }
+
+        private double convertFromBase(String UoM, double Qty)      //La stringa UoM conterrà l'unità di misura in cui bisognerà convertire
+        {
+            if(oldValue != listUoM[0].BaseUoM)
+                Qty = convertToBase(Qty);
+
+            double baseUoMQty = 0;
+
+            foreach (UoM um in listUoM)
+            {
+                if(um.ComparableUoM == UoM)
+                    baseUoMQty = um.BaseUoMQty;
+            }
+
+            //Quantità ordine (unità base) / BaseUoMQty (unità da convertire) = Quantità ordine (unità convertita)
+            return Math.Round(Qty / baseUoMQty, 2);
+        }
+
+        private void dgvTabella_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                if (e.ColumnIndex == 5)
+                {
+                    String cellValue = dgvTabella.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+                    prendiDatiUoM(dgvTabella.Rows[e.RowIndex].Cells["RowItem"].Value.ToString());       //Riempio la lista per l'item in cui è stato cambiato il valore della cella
+
+                    if(cellValue != listUoM[0].BaseUoM)
+                    {
+                        double n = convertFromBase(cellValue, Double.Parse(dgvTabella.Rows[e.RowIndex].Cells["RowQty"].Value.ToString()));
+                        doc.Righe[Int32.Parse(dgvTabella.Rows[e.RowIndex].Cells["RowLine"].Value.ToString()) - 1].RowUoM = cellValue;
+                        doc.Righe[Int32.Parse(dgvTabella.Rows[e.RowIndex].Cells["RowLine"].Value.ToString()) - 1].RowQty = n;
+                    }
+                    else
+                    {
+                        double n = convertToBase(Double.Parse(dgvTabella.Rows[e.RowIndex].Cells["RowQty"].Value.ToString()));
+
+                        doc.Righe[Int32.Parse(dgvTabella.Rows[e.RowIndex].Cells["RowLine"].Value.ToString()) - 1].RowUoM = cellValue;
+                        doc.Righe[Int32.Parse(dgvTabella.Rows[e.RowIndex].Cells["RowLine"].Value.ToString()) - 1].RowQty = n;
+                    }
+                }
+            }
+            caricaTabellaOrdini();
+        }
+
+        private void dgvTabella_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                if (e.ColumnIndex == 5)
+                {
+                    oldValue = dgvTabella[e.ColumnIndex, e.RowIndex].Value.ToString();
+                }
+            }
         }
     }
 }
