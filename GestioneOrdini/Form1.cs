@@ -723,6 +723,7 @@ namespace GestioneOrdini
                 if (e.ColumnIndex == 5)
                 {
                     String cellValue = dgvTabella.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+                    cellValue = cellValue.ToUpper();
                     prendiDatiUoM(dgvTabella.Rows[e.RowIndex].Cells["RowItem"].Value.ToString());       //Riempio la lista per l'item in cui è stato cambiato il valore della cella
 
                     if(cellValue != listUoM[0].BaseUoM)
@@ -750,6 +751,7 @@ namespace GestioneOrdini
                 if (e.ColumnIndex == 5)
                 {
                     oldValue = dgvTabella[e.ColumnIndex, e.RowIndex].Value.ToString();
+                    oldValue = oldValue.ToUpper();
                 }
             }
         }
