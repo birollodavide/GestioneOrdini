@@ -229,7 +229,7 @@ namespace GestioneOrdini
                                     TBGuid = elTBGuid[0].InnerText,
                                 };
                             }
-                            catch (Exception ex)
+                            catch (NullReferenceException ex)
                             {
                                 Form1 form1 = new Form1();
                                 form1.lblRicerca.Visible = true;
@@ -492,6 +492,7 @@ namespace GestioneOrdini
             await Task.Delay(n);
         }
 
+
         private void textBox1_EnabledChanged(object sender, EventArgs e)
         {
             if (txtNumOrdine.Enabled == false)
@@ -573,7 +574,6 @@ namespace GestioneOrdini
                         //Mostro a video la box di errore
                         MessageBox.Show("Errore nella lettura del barcode!");
                     }
-
                 }
                 else if (barcodeString.Length > 13)
                 {
@@ -644,7 +644,8 @@ namespace GestioneOrdini
         private void prendiDatiUoM(String item)
         {
             String baseUoM = "";
-            
+            listUoM.Clear();
+
             //Connessione al server per ottenere Item da numOrdine
             SqlConnection sqlConn = new SqlConnection(ConfigurationManager.ConnectionStrings["GestioneOrdiniConnectionString"].ConnectionString);
             
@@ -671,18 +672,13 @@ namespace GestioneOrdini
                 um.ComparableUoM = reader2["ComparableUoM"].ToString();
                 um.BaseUoMQty = Double.Parse(reader2["BaseUoMQty"].ToString());
                 um.CompUoMQty = Int32.Parse(reader2["CompUoMQty"].ToString());
+                um.Item = item;
+                um.BaseUoM = baseUoM;
                 listUoM.Add(um);
             }
 
             reader2.Close();
             sqlConn.Close();
-
-            //Per ogni elemento della lista aggiornare l'attributo Item e BaseUoM
-            for (int i = 0; i < listUoM.Count; i++)
-            {
-                listUoM[i].Item = item;
-                listUoM[i].BaseUoM = baseUoM;
-            }
         }
 
         private double convertToBase(double Qty)        //La stringa UoM conterrà l'unità di misura dalla quale bisogna convertire
